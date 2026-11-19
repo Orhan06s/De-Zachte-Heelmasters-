@@ -17,6 +17,11 @@ public static class PasswordPolicy
             errors.Add("Gebruik minimaal één hoofdletter.");
         }
 
+        if (!password.Any(c => !char.IsLetterOrDigit(c)))
+        {
+            errors.Add("Gebruik minimaal één speciaal teken.");
+        }
+
         return errors;
     }
 }
