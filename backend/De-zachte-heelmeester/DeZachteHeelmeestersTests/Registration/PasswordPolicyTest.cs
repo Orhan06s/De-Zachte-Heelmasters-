@@ -32,6 +32,20 @@ public class PasswordPolicyTest
         // Assert
         Assert.IsTrue(result.Contains("Gebruik minimaal één hoofdletter."));
     }
+
+    [TestMethod]
+    [TestProperty("LOG-01", "AC3")]
+    public void Validate_NoSpecialCharacter_ReturnsSpecialCharacterError()
+    {
+        // Arrange
+        var password = "Test2026";
+        
+        // Act
+        var result = PasswordPolicy.Validate(password);
+        
+        // Assert
+        Assert.IsTrue(result.Contains("Gebruik minimaal één speciaal teken."));
+    }
     
     [TestMethod]
     [TestProperty( "LOG-01", "AC3")]
