@@ -32,6 +32,15 @@ public static class PasswordPolicy
             errors.Add("Gebruik minimaal één cijfer.");
         }
 
+        for (var i = 2; i < password.Length; i++)
+        {
+            if (password[i] == password[i - 1] && password[i] == password[i - 2])
+            {
+                errors.Add("Gebruik niet meer dan twee dezelfde tekens achter elkaar.");
+                break;
+            }
+        }
+
         return errors;
     }
 }
