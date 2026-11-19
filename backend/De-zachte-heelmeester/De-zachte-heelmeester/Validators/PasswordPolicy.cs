@@ -21,6 +21,11 @@ public static class PasswordPolicy
         {
             errors.Add("Gebruik minimaal één speciaal teken.");
         }
+        
+        if (!password.Any(char.IsLower))
+        {
+            errors.Add("Gebruik minimaal één kleine letter.");
+        }
 
         return errors;
     }
