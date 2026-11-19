@@ -12,6 +12,11 @@ public static class PasswordPolicy
             errors.Add("Gebruik minimaal 8 tekens.");
         }
 
+        if (!password.Any(char.IsUpper))
+        {
+            errors.Add("Gebruik minimaal één hoofdletter.");
+        }
+
         return errors;
     }
 }
