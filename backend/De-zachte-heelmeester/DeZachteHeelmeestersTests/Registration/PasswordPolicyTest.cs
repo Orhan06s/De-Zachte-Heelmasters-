@@ -76,6 +76,20 @@ public class PasswordPolicyTest
     }
     
     [TestMethod]
+    [TestProperty("LOG-01", "AC3")]
+    public void Validate_ThreeSameCharactersInARow_ReturnsRepeatedCharactersError()
+    {
+        // Arrange
+        var password = "!Test2000";
+
+        // Act
+        var result = PasswordPolicy.Validate(password);
+
+        // Assert
+        Assert.IsTrue(result.Contains("Gebruik niet meer dan twee dezelfde tekens achter elkaar."));
+    }
+    
+    [TestMethod]
     [TestProperty( "LOG-01", "AC3")]
     public void Validate_ValidPassword_ReturnsNoErrors()
     {
