@@ -62,6 +62,20 @@ public class PasswordPolicyTest
     }
     
     [TestMethod]
+    [TestProperty("LOG-01", "AC3")]
+    public void Validate_NoDigit_ReturnsDigitError()
+    {
+        // Arrange
+        var password = "!Testwoord";
+
+        // Act
+        var result = PasswordPolicy.Validate(password);
+
+        // Assert
+        Assert.IsTrue(result.Contains("Gebruik minimaal één cijfer."));
+    }
+    
+    [TestMethod]
     [TestProperty( "LOG-01", "AC3")]
     public void Validate_ValidPassword_ReturnsNoErrors()
     {
