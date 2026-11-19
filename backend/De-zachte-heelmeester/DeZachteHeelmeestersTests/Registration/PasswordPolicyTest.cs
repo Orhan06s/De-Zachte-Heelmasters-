@@ -48,6 +48,20 @@ public class PasswordPolicyTest
     }
     
     [TestMethod]
+    [TestProperty("LOG-01", "AC3")]
+    public void Validate_NoLowercase_ReturnsLowercaseError()
+    {
+        // Arrange
+        var password = "!TEST2026";
+
+        // Act
+        var result = PasswordPolicy.Validate(password);
+
+        // Assert
+        Assert.IsTrue(result.Contains("Gebruik minimaal één kleine letter."));
+    }
+    
+    [TestMethod]
     [TestProperty( "LOG-01", "AC3")]
     public void Validate_ValidPassword_ReturnsNoErrors()
     {
