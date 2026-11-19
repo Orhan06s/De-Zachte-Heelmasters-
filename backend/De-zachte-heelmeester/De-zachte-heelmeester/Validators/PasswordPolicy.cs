@@ -27,6 +27,11 @@ public static class PasswordPolicy
             errors.Add("Gebruik minimaal één kleine letter.");
         }
 
+        if (!password.Any(char.IsDigit))
+        {
+            errors.Add("Gebruik minimaal één cijfer.");
+        }
+
         return errors;
     }
 }
