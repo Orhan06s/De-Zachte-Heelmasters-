@@ -53,7 +53,7 @@ public class RegistrationServiceTest
 
         // Assert
         Assert.AreEqual(0, result.Count);
-        _mockPatientRepository.Verify(r => r.UpdateAsync(It.IsAny<Patient>()), Times.Never);
+        _mockPatientRepository.Verify(r => r.UpdateAsync(It.IsAny<Patient>()), Times.Once);
         _mockPatientRepository.Verify(r => r.AddAsync(It.IsAny<Patient>()), Times.Never);
         _mockUserRepository.Verify(r => r.CreateAsync("test1@test.nl", "!Test2026"), Times.Once);
     }
