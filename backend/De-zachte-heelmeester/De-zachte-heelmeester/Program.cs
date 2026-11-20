@@ -1,6 +1,8 @@
 
 using De_zachte_heelmeester.Data;
 using De_zachte_heelmeester.Models;
+using De_zachte_heelmeester.Repositories;
+using De_zachte_heelmeester.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,7 +42,12 @@ namespace De_zachte_heelmeester
             builder.Services.AddOpenApi();
 
             builder.Services.AddDataProtection();
-
+                        
+            builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+            
+            
             var app = builder.Build();
 
             // Seed database
