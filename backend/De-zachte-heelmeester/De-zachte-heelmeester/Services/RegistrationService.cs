@@ -29,7 +29,7 @@ public class RegistrationService : IRegistrationService
         {
             return errors;
         }
-
+        
         // 3. Bestaat er al een account?
         var patient = await _patientRepository.GetByBsnAsync(request.Bsn);
         if (patient != null && patient.UserId != null)
@@ -40,6 +40,12 @@ public class RegistrationService : IRegistrationService
         // 4. Account aanmaken
         var userId = await _userRepository.CreateAsync(request.Email, request.Password);
 
+        // 5. Is het account aangemaakt
+        if (userId == null)
+        {
+            return new List<string> { "Er is al een account met dit e-mailadres." };
+        }
+        
         if (patient == null)
         {
             // AC1: nieuwe patiënt
