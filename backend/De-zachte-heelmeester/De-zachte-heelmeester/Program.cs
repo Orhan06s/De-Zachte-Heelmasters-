@@ -47,6 +47,15 @@ namespace De_zachte_heelmeester
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IRegistrationService, RegistrationService>();
             
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("VueFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
             
             var app = builder.Build();
 
@@ -67,7 +76,7 @@ namespace De_zachte_heelmeester
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors("VueFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
 
