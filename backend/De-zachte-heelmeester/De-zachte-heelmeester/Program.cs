@@ -51,13 +51,14 @@ namespace De_zachte_heelmeester
             var app = builder.Build();
 
             // Seed database
+            /*
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider
                     .GetRequiredService<ApplicationDbContext>();
 
                 await DbSeeder.SeedAsync(context);
-            }
+            }*/
 
             // Configure HTTP request pipeline
             if (app.Environment.IsDevelopment())
