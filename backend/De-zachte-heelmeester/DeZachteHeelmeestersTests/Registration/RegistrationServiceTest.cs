@@ -29,6 +29,7 @@ public class RegistrationServiceTest
         // Arrange
         var request = new RegisterRequest { Bsn = "111222333", Email = "test1@test.nl", Password = "!Test2026" };
         _mockPatientRepository.Setup(r => r.GetByBsnAsync("111222333")).ReturnsAsync((Patient?)null);
+        _mockUserRepository.Setup(r => r.CreateAsync("test1@test.nl", "!Test2026")).ReturnsAsync("user-1");
         
         // Act
         var result = await _registrationService.RegisterAsync(request);
@@ -47,6 +48,7 @@ public class RegistrationServiceTest
         var request = new RegisterRequest { Bsn = "111222333", Email = "test1@test.nl", Password = "!Test2026" };
         var patient = new Patient { BSN = "111222333", UserId = null };
         _mockPatientRepository.Setup(r => r.GetByBsnAsync("111222333")).ReturnsAsync(patient);
+        _mockUserRepository.Setup(r => r.CreateAsync("test1@test.nl", "!Test2026")).ReturnsAsync("user-1");
 
         // Act
         var result = await _registrationService.RegisterAsync(request);
@@ -103,5 +105,22 @@ public class RegistrationServiceTest
         // Assert
         Assert.IsTrue(result.Count > 0);
         _mockUserRepository.Verify(r => r.CreateAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+    
+    [TestMethod]
+    [TestProperty("LOG-01", "Email")]
+    public async Task RegisterAsync_AccountCreationFails_ReturnsError()
+    {
+        // Arrange
+        var request = new RegisterRequest { Bsn = "111222333", Email = "test1@test.nl", Password = "!Test2026" };
+        _mockPatientRepository.Setup(r => r.GetByBsnAsync("111222333")).ReturnsAsync((Patient?)null);
+        _mockUserRepository.Setup(r => r.CreateAsync("test1@test.nl", "!Test2026")).ReturnsAsync((string?)null);
+
+        // Act
+        var result = await _registrationService.RegisterAsync(request);
+
+        // Assert
+        Assert.IsTrue(result.Count > 0);
+        _mockPatientRepository.Verify(r => r.AddAsync(It.IsAny<Patient>()), Times.Never);
     }
 }
