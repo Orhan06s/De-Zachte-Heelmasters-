@@ -123,4 +123,22 @@ public class RegistrationServiceTest
         Assert.IsTrue(result.Count > 0);
         _mockPatientRepository.Verify(r => r.AddAsync(It.IsAny<Patient>()), Times.Never);
     }
+    
+    [TestMethod]
+    [TestProperty("LOG-01", "Email")]
+    [DataRow("")]
+    [DataRow("henk")]
+    [DataRow("henk@")]
+    public async Task RegisterAsync_InvalidEmail_ReturnsError(string email)
+    {
+        // Arrange
+        var request = new RegisterRequest { Bsn = "111222333", Email = email, Password = "!Test2026" };
+
+        // Act
+        var result = await _registrationService.RegisterAsync(request);
+
+        // Assert
+        Assert.IsTrue(result.Count > 0);
+        _mockUserRepository.Verify(r => r.CreateAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
 }
