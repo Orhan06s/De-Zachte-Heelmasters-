@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using De_zachte_heelmeester.Models;
 using De_zachte_heelmeester.Repositories;
 using De_zachte_heelmeester.Validators;
@@ -22,25 +23,30 @@ public class RegistrationService : IRegistrationService
         {
             return new List<string> { "Vul een geldig BSN in." };
         }
+        // 2. E-mailadres
+        if (string.IsNullOrWhiteSpace(request.Email) || !new EmailAddressAttribute().IsValid(request.Email))
+        {
+            return new List<string> { "Vul een geldig e-mailadres in." };
+        }
 
-        // 2. Wachtwoord
+        // 3. Wachtwoord
         var errors = PasswordPolicy.Validate(request.Password);
         if (errors.Count > 0)
         {
             return errors;
         }
         
-        // 3. Bestaat er al een account?
+        // 4. Bestaat er al een account?
         var patient = await _patientRepository.GetByBsnAsync(request.Bsn);
         if (patient != null && patient.UserId != null)
         {
             return new List<string> { "Er bestaat al een account met dit BSN." };
         }
 
-        // 4. Account aanmaken
+        // 5. Account aanmaken
         var userId = await _userRepository.CreateAsync(request.Email, request.Password);
 
-        // 5. Is het account aangemaakt
+        // 6. Is het account aangemaakt
         if (userId == null)
         {
             return new List<string> { "Er is al een account met dit e-mailadres." };
