@@ -30,9 +30,8 @@ namespace De_zachte_heelmeester.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AppointmentId"));
 
-                    b.Property<string>("PatientBSN")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(9)");
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -43,7 +42,7 @@ namespace De_zachte_heelmeester.Migrations
 
                     b.HasKey("AppointmentId");
 
-                    b.HasIndex("PatientBSN");
+                    b.HasIndex("PatientId");
 
                     b.HasIndex("TimeSlotId");
 
@@ -80,7 +79,14 @@ namespace De_zachte_heelmeester.Migrations
 
             modelBuilder.Entity("De_zachte_heelmeester.Models.Patient", b =>
                 {
+                    b.Property<int>("PatientId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientId"));
+
                     b.Property<string>("BSN")
+                        .IsRequired()
                         .HasMaxLength(9)
                         .HasColumnType("nvarchar(9)");
 
@@ -88,15 +94,20 @@ namespace De_zachte_heelmeester.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("BSN");
+                    b.HasKey("PatientId");
+
+                    b.HasIndex("BSN")
+                        .IsUnique();
 
                     b.HasIndex("UserId")
                         .IsUnique()
@@ -376,7 +387,7 @@ namespace De_zachte_heelmeester.Migrations
                 {
                     b.HasOne("De_zachte_heelmeester.Models.Patient", "Patient")
                         .WithMany("Appointments")
-                        .HasForeignKey("PatientBSN")
+                        .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
