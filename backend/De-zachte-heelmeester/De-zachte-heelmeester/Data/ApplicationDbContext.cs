@@ -86,6 +86,38 @@ namespace De_zachte_heelmeester.Data
                 .Property(p => p.BSN)
                 .HasMaxLength(9)
                 .IsRequired();
+            
+            // Patients: controles op databaseniveau
+            builder.Entity<Patient>()
+                .ToTable(p =>
+                {
+                    // BSN: 9 cijfers en de elfproef (dezelfde regel als BsnValidator in de backend)
+                    p.HasCheckConstraint("CK_Patients_BSN", """
+                                                            [BSN] <> '000000000'
+                                                            AND CASE
+                                                                WHEN LEN([BSN]) = 9 AND [BSN] NOT LIKE '%[^0-9]%' THEN
+                                                                    ( CAST(SUBSTRING([BSN], 1, 1) AS INT) * 9
+                                                                    + CAST(SUBSTRING([BSN], 2, 1) AS INT) * 8
+                                                                    + CAST(SUBSTRING([BSN], 3, 1) AS INT) * 7
+                                                                    + CAST(SUBSTRING([BSN], 4, 1) AS INT) * 6
+                                                                    + CAST(SUBSTRING([BSN], 5, 1) AS INT) * 5
+                                                                    + CAST(SUBSTRING([BSN], 6, 1) AS INT) * 4
+                                                                    + CAST(SUBSTRING([BSN], 7, 1) AS INT) * 3
+                                                                    + CAST(SUBSTRING([BSN], 8, 1) AS INT) * 2
+                                                                    - CAST(SUBSTRING([BSN], 9, 1) AS INT) ) % 11
+                                                                ELSE 1
+                                                            END = 0
+                                                            """);
+
+                    // E-mailadres: mag leeg zijn (de huisarts vult het niet in), anders de vorm naam@domein.nl
+                    p.HasCheckConstraint("CK_Patients_Email", "[Email] IS NULL OR [Email] LIKE '%_@_%._%'");
+                });
+
+            // AspNetUsers: één account per e-mailadres, ook als twee registraties tegelijk binnenkomen
+            builder.Entity<User>()
+                .HasIndex(u => u.NormalizedEmail)
+                .IsUnique()
+                .HasFilter("[NormalizedEmail] IS NOT NULL");
 
             // Refresh token hash configuration
             builder.Entity<UserSession>()
