@@ -7,7 +7,7 @@ namespace De_zachte_heelmeester.Controllers;
 /// Endpoints that only a user with the role Huisarts may use.
 /// </summary>
 [ApiController]
-[Route("api/huisarts")]
+[Route("api/general-practitioner")]
 [Authorize(Roles = "Huisarts")]
 public class GeneralPractitionerController : ControllerBase
 {

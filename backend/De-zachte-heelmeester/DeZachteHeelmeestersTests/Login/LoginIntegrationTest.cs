@@ -13,7 +13,7 @@ public class LoginIntegrationTest
     private const string Password = "Test123!wachtwoord";
     private const string LoginUrl = "/api/auth/login";
     private const string CurrentUserUrl = "/api/auth/me";
-    private const string HuisartsOnlyUrl = "/api/huisarts";
+    private const string GeneralPractitionerOnlyUrl = "/api/general-practitioner";
 
     // AC1: correct credentials. The API returns the role, so the frontend can show the start page of that role.
     [TestMethod]
@@ -42,7 +42,7 @@ public class LoginIntegrationTest
         var login = await client.PostAsJsonAsync(LoginUrl, new { email, password = Password });
         Assert.AreEqual(HttpStatusCode.OK, login.StatusCode, "Logging in must succeed first.");
 
-        var huisartsPage = await client.GetAsync(HuisartsOnlyUrl);
+        var huisartsPage = await client.GetAsync(GeneralPractitionerOnlyUrl);
         var currentUser = await client.GetAsync(CurrentUserUrl);
 
         Assert.AreEqual(HttpStatusCode.Forbidden, huisartsPage.StatusCode);
