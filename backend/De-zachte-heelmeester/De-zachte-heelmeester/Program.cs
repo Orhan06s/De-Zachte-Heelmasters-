@@ -68,8 +68,10 @@ namespace De_zachte_heelmeester
             {
                 var context = scope.ServiceProvider
                     .GetRequiredService<ApplicationDbContext>();
+                var roleManager = scope.ServiceProvider
+                    .GetRequiredService<RoleManager<IdentityRole>>();
 
-                await DbSeeder.SeedAsync(context);
+                await DbSeeder.SeedAsync(context, roleManager);
             }
 
             // Configure HTTP request pipeline
