@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const error = ref(null)
   const errors = ref([])
+  const roles = ref([])
 
   async function register(bsn, email, password) {
     loading.value = true
@@ -24,5 +25,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { loading, error, errors, register }
+  async function login(email, password) {
+    loading.value = true
+    error.value = null
+    errors.value = []
+    try {
+      const response = await api.post('/api/auth/login', { email, password })
+      roles.value = response.data.roles
+      return true
+    } catch (e) {
+      roles.value = []
+      error.value = errorMessage(e)
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { loading, error, errors, roles, register, login }
 })
