@@ -66,6 +66,9 @@ namespace De_zachte_heelmeester
             builder.Services.AddScoped<IPatientRepository, PatientRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+            builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
+            builder.Services.AddScoped<IAppointmentService, AppointmentService>();
             
             builder.Services.AddCors(options =>
             {
