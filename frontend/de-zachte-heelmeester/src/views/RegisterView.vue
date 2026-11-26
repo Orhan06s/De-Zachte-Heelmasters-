@@ -84,7 +84,7 @@ async function handleRegister() {
         <div class="field">
           <label for="confirm-password">Herhaal wachtwoord</label>
           <div class="input-wrapper">
-            <input id="confirm-password" v-model="confirmPassword" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" aria-describedby="confirm-password-error" :aria-invalid="(touched.confirmPassword || confirmPassword !== '') && !!confirmError" required @blur="touched.confirmPassword = true" @copy.prevent @cut.prevent />
+            <input id="confirm-password" v-model="confirmPassword" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" aria-describedby="confirm-password-error" :aria-invalid="(touched.confirmPassword || confirmPassword !== '') && !!confirmError" required @blur="touched.confirmPassword = true" @paste.prevent />
             <ClearButton v-if="confirmPassword" class="field-button" label="Herhaal wachtwoord" @clear="clearField('confirmPassword', 'confirm-password')" />
           </div>
           <span v-if="(touched.confirmPassword || confirmPassword !== '') && confirmError" id="confirm-password-error" class="field-error" role="alert">{{ confirmError }}</span>
