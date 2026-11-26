@@ -18,6 +18,11 @@ public class PatientRepository : IPatientRepository
         return await _context.Patients.FirstOrDefaultAsync(p => p.BSN == bsn);
     }
 
+    public async Task<Patient?> GetByUserIdAsync(string userId)
+    {
+        return await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+    }
+
     public async Task AddAsync(Patient patient)
     {
         _context.Patients.Add(patient);
