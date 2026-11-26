@@ -19,8 +19,6 @@ public class TestEnvironment
     private const string TestConnectionString =
         "Server=(localdb)\\MSSQLLocalDB;Database=" + TestDatabaseName + ";Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 
-    private static readonly string[] Roles = ["Patient", "Huisarts", "Specialist", "Medewerker", "Beheerder"];
-
     public static WebApplicationFactory<Program> Api { get; private set; } = null!;
 
     [AssemblyInitialize]
@@ -40,13 +38,10 @@ public class TestEnvironment
         }
 
         await db.Database.EnsureDeletedAsync();
-        await db.Database.MigrateAsync();
 
+        // The same seeder as the API: migrations and roles
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        foreach (var role in Roles)
-        {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
+        await DbSeeder.SeedAsync(db, roleManager);
     }
 
     [AssemblyCleanup]

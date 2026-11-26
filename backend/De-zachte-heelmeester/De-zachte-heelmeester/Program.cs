@@ -1,6 +1,7 @@
 
 using De_zachte_heelmeester.Data;
 using De_zachte_heelmeester.Models;
+using De_zachte_heelmeester.Repositories;
 using De_zachte_heelmeester.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -61,9 +62,22 @@ namespace De_zachte_heelmeester
             builder.Services.AddOpenApi();
 
             builder.Services.AddDataProtection();
-
+                        
+            builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IRegistrationService, RegistrationService>();
             builder.Services.AddScoped<AppointmentService>();
-
+            
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("VueFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+            
             var app = builder.Build();
 
             // Seed database
@@ -71,8 +85,10 @@ namespace De_zachte_heelmeester
             {
                 var context = scope.ServiceProvider
                     .GetRequiredService<ApplicationDbContext>();
+                var roleManager = scope.ServiceProvider
+                    .GetRequiredService<RoleManager<IdentityRole>>();
 
-                await DbSeeder.SeedAsync(context);
+                await DbSeeder.SeedAsync(context, roleManager);
             }
 
             // Configure HTTP request pipeline
@@ -82,7 +98,7 @@ namespace De_zachte_heelmeester
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors("VueFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
 
