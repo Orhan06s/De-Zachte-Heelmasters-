@@ -41,6 +41,10 @@ namespace De_zachte_heelmeester
 
             builder.Services.AddDataProtection();
 
+             // LOG-04: login links
+            builder.Services.AddSingleton(TimeProvider.System);
+            builder.Services.AddScoped<De_zachte_heelmeester.Services.LoginLinkService>();
+
             var app = builder.Build();
 
             // Seed database
