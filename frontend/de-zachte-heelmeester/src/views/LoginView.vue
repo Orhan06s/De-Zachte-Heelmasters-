@@ -4,8 +4,11 @@ import { useAuthStore } from '@/stores/auth.js'
 import ClearButton from '@/components/ClearButton.vue'
 import PasswordToggle from '@/components/PasswordToggle.vue'
 import ErrorSummary from '@/components/ErrorSummary.vue'
+import { useRouter } from 'vue-router'
+import { startPageFor } from '@/utils/startPage.js'
 
 const auth = useAuthStore()
+const router = useRouter()
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
@@ -16,7 +19,10 @@ auth.error = null
 async function handleLogin() {
     const success = await auth.login(email.value, password.value)
 
-    if (!success) {
+    if (success) {
+        // The user goes to the start page of his role
+        router.push({ name: startPageFor(auth.roles) })
+    } else {
         // The email address stays filled in, only the password is cleared
         password.value = ''
         document.getElementById('password').focus()
