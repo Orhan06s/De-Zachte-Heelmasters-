@@ -43,9 +43,10 @@ namespace De_zachte_heelmeester
 
             var app = builder.Build();
 
-            // Seed database
-            using (var scope = app.Services.CreateScope())
+            // Seed database (only locally; on production the pipeline runs the migrations)
+            if (app.Environment.IsDevelopment())
             {
+                using var scope = app.Services.CreateScope();
                 var context = scope.ServiceProvider
                     .GetRequiredService<ApplicationDbContext>();
 
