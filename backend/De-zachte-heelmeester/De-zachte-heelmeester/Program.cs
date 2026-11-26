@@ -1,6 +1,7 @@
 
 using De_zachte_heelmeester.Data;
 using De_zachte_heelmeester.Models;
+using De_zachte_heelmeester.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,6 +61,9 @@ namespace De_zachte_heelmeester
             builder.Services.AddOpenApi();
 
             builder.Services.AddDataProtection();
+
+            builder.Services.AddScoped<IUserRoleProvider, IdentityUserRoleProvider>();
+            builder.Services.AddScoped<RoleLoginService>();
 
             var app = builder.Build();
 
