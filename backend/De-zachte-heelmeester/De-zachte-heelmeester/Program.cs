@@ -43,16 +43,19 @@ namespace De_zachte_heelmeester
 
             var app = builder.Build();
 
-            // Seed database (only locally; on production the pipeline runs the migrations)
-            if (app.Environment.IsDevelopment())
+             // Database: migrations only locally (online the pipeline does this), roles always
+            using (var scope = app.Services.CreateScope())
             {
-                using var scope = app.Services.CreateScope();
                 var context = scope.ServiceProvider
                     .GetRequiredService<ApplicationDbContext>();
 
+                if (app.Environment.IsDevelopment())
+                {
+                    await context.Database.MigrateAsync();
+                }
+
                 await DbSeeder.SeedAsync(context);
             }
-
             // Configure HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
