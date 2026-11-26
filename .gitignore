@@ -12,3 +12,9 @@ obj/
 bin/
 obj/
 *.user
+
+# Deploy
+*.publishSettings
+*.pubxml.user
+*.zip
+wwwroot/

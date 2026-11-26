@@ -11,8 +11,7 @@ namespace De_zachte_heelmeester.Data
             ApplicationDbContext context,
             RoleManager<IdentityRole> roleManager)
         {
-            // Apply pending migrations
-            await context.Database.MigrateAsync();
+        
 
             // Roles: only create a role if it does not exist yet, so starting the API twice is safe
             foreach (var role in Roles)
