@@ -14,9 +14,11 @@ const showPassword = ref(false)
 const confirmPassword = ref('')
 const success = ref(false)
 
+
+
 const fields = { bsn, email, password, confirmPassword }
 
-const { touched, bsnError, emailError, passwordError, confirmError, isFormValid } =
+const { touched, bsnError, emailError, passwordError, confirmError, isFormValid, passwordRules } =
   useRegisterValidation(bsn, email, password, confirmPassword)
 
 function clearField(name, id) {
@@ -71,7 +73,11 @@ async function handleRegister() {
             <ClearButton v-if="password" class="field-button" label="Wachtwoord" @clear="clearField('password', 'password')" />
             <PasswordToggle v-model="showPassword" class="eye-button" />
           </div>
-          <span id="password-hint" class="hint">Minimaal 8 tekens, met een hoofdletter, een kleine letter, een cijfer en een speciaal teken. Niet drie keer hetzelfde teken achter elkaar.</span>
+          <ul id="password-hint" class="password-rules">
+            <li v-for="rule in passwordRules" :key="rule.label" :class="{ met: rule.met }">
+            {{ rule.met ? '✓' : '✗' }} {{ rule.label }}
+            </li>
+            </ul>
           <span v-if="touched.password && passwordError" id="password-error" class="field-error" role="alert">{{ passwordError }}</span>
         </div>
 
@@ -225,6 +231,18 @@ input:focus-visible,
   top: 50%;
   right: 3.25rem;
   transform: translateY(-50%);
+}
+
+.password-rules {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+  color: #b91c1c;
+}
+
+.password-rules li.met {
+  color: #00c64c;
 }
 
 @media (max-width: 480px) {
