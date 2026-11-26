@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref(null)
   const errors = ref([])
   const roles = ref([])
+  const accessMessage = ref(null)
 
   async function register(bsn, email, password) {
     loading.value = true
@@ -42,5 +43,14 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { loading, error, errors, roles, register, login }
+  async function fetchCurrentUser() {
+    try {
+      const response = await api.get('/api/auth/me')
+      roles.value = response.data.roles
+    } catch {
+      roles.value = []
+    }
+  }
+
+  return { loading, error, errors, roles, accessMessage, register, login, fetchCurrentUser }
 })

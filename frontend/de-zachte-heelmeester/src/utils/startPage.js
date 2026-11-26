@@ -10,3 +10,8 @@ const startPages = {
 export function startPageFor(roles) {
     return startPages[roles[0]] ?? 'login'
 }
+
+// True when the user has at least one of the roles that may open the page
+export function hasAccess(allowedRoles, roles) {
+    return allowedRoles.some((role) => roles.includes(role))
+}
