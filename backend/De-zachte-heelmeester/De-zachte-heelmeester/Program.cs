@@ -59,11 +59,22 @@ namespace De_zachte_heelmeester
             }
 
             app.UseHttpsRedirection();
+            // Serve the Vue frontend from wwwroot
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
+            // Health check for the deploy pipeline
+            app.MapGet("/api/health", async (ApplicationDbContext db) =>
+                await db.Database.CanConnectAsync()
+                    ? Results.Ok(new { status = "ok" })
+                    : Results.Problem("database onbereikbaar"));
+
+            // Vue routes (like /login) go to index.html
+            app.MapFallbackToFile("index.html");
 
             app.Run();
         }
