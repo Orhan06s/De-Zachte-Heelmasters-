@@ -13,6 +13,7 @@ public class LoginLinkServiceTests
     private FakeClock _clock = null!;
     private ApplicationDbContext _context = null!;
     private LoginLinkService _service = null!;
+    private const string VerifyUrl = "http://localhost:5173/login/verify";
 
     [TestInitialize]
     public void Setup()
@@ -24,7 +25,8 @@ public class LoginLinkServiceTests
 
         _context = new ApplicationDbContext(options);
         _clock = new FakeClock(new DateTimeOffset(2026, 11, 26, 12, 0, 0, TimeSpan.Zero));
-        _service = new LoginLinkService(_context, _clock);
+        var mail = new DatabaseMailService(_context, _clock);
+        _service = new LoginLinkService(_context, _clock, mail);
     }
 
     [TestCleanup]
@@ -79,6 +81,31 @@ public class LoginLinkServiceTests
         var result = await _service.VerifyLinkAsync(token);
 
         Assert.AreEqual(LoginLinkStatus.Invalid, result.Status);
+    }
+
+        // AC1: the user gets an email with a link that logs him in
+    [TestMethod]
+    public async Task SendLink_StoresEmailWithWorkingLink()
+    {
+        await _service.SendLinkAsync("user-1", "patient@test.nl", VerifyUrl);
+
+        var email = await _context.EmailMessages.SingleAsync();
+        Assert.AreEqual("patient@test.nl", email.To);
+        StringAssert.Contains(email.Body, VerifyUrl + "?token=");
+
+        var token = System.Text.RegularExpressions.Regex.Match(email.Body, "token=([0-9A-F]+)").Groups[1].Value;
+        var result = await _service.VerifyLinkAsync(token);
+        Assert.AreEqual(LoginLinkStatus.Success, result.Status);
+    }
+
+    // The email only contains a link, no personal data
+    [TestMethod]
+    public async Task SendLink_EmailContainsNoUserId()
+    {
+        await _service.SendLinkAsync("user-1", "patient@test.nl", VerifyUrl);
+
+        var email = await _context.EmailMessages.SingleAsync();
+        Assert.IsFalse(email.Body.Contains("user-1"));
     }
 }
 

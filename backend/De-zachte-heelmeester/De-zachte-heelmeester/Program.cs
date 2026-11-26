@@ -44,6 +44,7 @@ namespace De_zachte_heelmeester
              // LOG-04: login links
             builder.Services.AddSingleton(TimeProvider.System);
             builder.Services.AddScoped<De_zachte_heelmeester.Services.LoginLinkService>();
+            builder.Services.AddScoped<De_zachte_heelmeester.Services.IMailService, De_zachte_heelmeester.Services.DatabaseMailService>();
 
             var app = builder.Build();
 

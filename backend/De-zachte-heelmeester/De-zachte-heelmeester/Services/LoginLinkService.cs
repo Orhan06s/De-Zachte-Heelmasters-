@@ -16,7 +16,7 @@ namespace De_zachte_heelmeester.Services
     public record LoginLinkResult(LoginLinkStatus Status, string? UserId);
 
     /// <summary>
-    /// Creates and checks login links that are valid for 5 minutes (LOG-04).
+    /// Creates, emails and checks login links that are valid for 5 minutes (LOG-04).
     /// </summary>
     public class LoginLinkService
     {
@@ -24,11 +24,13 @@ namespace De_zachte_heelmeester.Services
 
         private readonly ApplicationDbContext _context;
         private readonly TimeProvider _clock;
+        private readonly IMailService _mail;
 
-        public LoginLinkService(ApplicationDbContext context, TimeProvider clock)
+        public LoginLinkService(ApplicationDbContext context, TimeProvider clock, IMailService mail)
         {
             _context = context;
             _clock = clock;
+            _mail = mail;
         }
 
         /// <summary>
@@ -48,6 +50,22 @@ namespace De_zachte_heelmeester.Services
             await _context.SaveChangesAsync();
 
             return token;
+        }
+
+        /// <summary>
+        /// Creates a link and emails it to the user.
+        /// </summary>
+        public async Task SendLinkAsync(string userId, string email, string verifyUrl)
+        {
+            var token = await CreateLinkAsync(userId);
+            var link = $"{verifyUrl}?token={token}";
+
+            var body =
+                "Klik op de link hieronder om in te loggen. De link is 5 minuten geldig.\n\n" +
+                $"{link}\n\n" +
+                "Heb je niet geprobeerd in te loggen? Dan kun je deze e-mail negeren.";
+
+            await _mail.SendAsync(email, "Inloggen bij De zachte heelmeesters", body);
         }
 
         /// <summary>

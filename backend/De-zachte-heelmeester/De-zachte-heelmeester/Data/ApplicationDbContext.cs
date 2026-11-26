@@ -20,6 +20,7 @@ namespace De_zachte_heelmeester.Data
         public DbSet<Appointment> Appointments => Set<Appointment>();
         public DbSet<UserSession> UserSessions => Set<UserSession>();
         public DbSet<LoginLink> LoginLinks => Set<LoginLink>();
+        public DbSet<EmailMessage> EmailMessages => Set<EmailMessage>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
