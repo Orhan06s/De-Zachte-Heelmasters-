@@ -15,9 +15,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  server: {
-    proxy: {
-      '/api': 'http://localhost:5208',
-    },
+  build: {
+    // Build into the API's wwwroot, so frontend and API run on one address
+    outDir: '../../backend/De-zachte-heelmeester/De-zachte-heelmeester/wwwroot',
+    emptyOutDir: true,
   },
 })

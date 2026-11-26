@@ -1,0 +1,75 @@
+name: Deploy naar Acceptatie (A)
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  API_PROJECT: backend/De-zachte-heelmeester/De-zachte-heelmeester
+  SOLUTION: backend/De-zachte-heelmeester/De-zachte-heelmeester.slnx
+  CLIENT_DIR: frontend/de-zachte-heelmeester
+  SITE_URL: https://zachteheelmeestersacc.runasp.net
+
+jobs:
+  test-en-deploy:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Vue testen en bouwen
+        working-directory: ${{ env.CLIENT_DIR }}
+        run: |
+          npm ci
+          npm run test --if-present
+          npm run build
+
+      - name: .NET tests
+        run: dotnet test ${{ env.SOLUTION }} --configuration Release
+
+      - name: Publish
+        run: dotnet publish ${{ env.API_PROJECT }} -c Release -r win-x86 --self-contained false -o publish
+
+      - name: Migraties voorbereiden (script + bundle)
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.ACC_DB_CONNECTION_STRING }}
+        run: |
+          dotnet tool restore
+          dotnet ef migrations script --idempotent --output migrate.sql --project ${{ env.API_PROJECT }} --configuration Release
+          dotnet ef migrations bundle --output efbundle.exe --project ${{ env.API_PROJECT }} --configuration Release --force
+          Get-Content migrate.sql
+
+      - name: Migratiescript bewaren
+        uses: actions/upload-artifact@v4
+        with:
+          name: migrate-sql
+          path: migrate.sql
+
+      - name: Database migreren op A
+        env:
+          DB_CONNECTION_STRING: ${{ secrets.ACC_DB_CONNECTION_STRING }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.ACC_DB_CONNECTION_STRING }}
+        run: ./efbundle.exe --connection "$env:DB_CONNECTION_STRING"
+
+      - name: Deploy naar MonsterASP (acceptatie)
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+        with:
+          website-name: ${{ secrets.ACC_WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.ACC_SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.ACC_SERVER_USERNAME }}
+          server-password: ${{ secrets.ACC_SERVER_PASSWORD }}
+
+      - name: Smoke test /api/health
+        run: |
+          Start-Sleep -Seconds 10
+          $r = Invoke-RestMethod -Uri "$env:SITE_URL/api/health" -MaximumRetryCount 5 -RetryIntervalSec 10
+          $r | ConvertTo-Json
+          if ($r.status -ne "ok") { throw "Health check faalt" }
