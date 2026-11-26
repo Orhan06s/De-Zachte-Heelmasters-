@@ -1,24 +1,30 @@
 using System.Globalization;
-using De_zachte_heelmeester.Data;
 using De_zachte_heelmeester.Models;
-using Microsoft.EntityFrameworkCore;
+using De_zachte_heelmeester.Repositories;
 
 namespace De_zachte_heelmeester.Services;
 
 /// <summary>
 /// Finds the available slots of a specialist and books appointments without double bookings.
 /// </summary>
-public class AppointmentService
+public class AppointmentService : IAppointmentService
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IEmployeeRepository _employeeRepository;
+    private readonly IPatientRepository _patientRepository;
+    private readonly ITimeSlotRepository _timeSlotRepository;
 
-    public AppointmentService(ApplicationDbContext db)
+    public AppointmentService(
+        IEmployeeRepository employeeRepository,
+        IPatientRepository patientRepository,
+        ITimeSlotRepository timeSlotRepository)
     {
-        _db = db;
+        _employeeRepository = employeeRepository;
+        _patientRepository = patientRepository;
+        _timeSlotRepository = timeSlotRepository;
     }
 
     public Task<bool> SpecialistExistsAsync(int specialistId) =>
-        _db.Employees.AnyAsync(e => e.EmployeeId == specialistId);
+        _employeeRepository.ExistsAsync(specialistId);
 
     /// <summary>
     /// Returns every start time on the day where an appointment of the given length fits
@@ -33,7 +39,7 @@ public class AppointmentService
         }
 
         var duration = WorkingHours.Quarter * durationQuarters;
-        var booked = await BookedTimeSlots(specialistId, date).ToListAsync();
+        var booked = await _timeSlotRepository.GetBookedAsync(specialistId, date);
 
         for (var start = WorkingHours.Start; start + duration <= WorkingHours.End; start += WorkingHours.Quarter)
         {
@@ -63,67 +69,37 @@ public class AppointmentService
             return BookingResult.SpecialistNotFound;
         }
 
-        var patient = await _db.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+        var patient = await _patientRepository.GetByUserIdAsync(userId);
         if (patient == null)
         {
             return BookingResult.PatientNotFound;
         }
 
-        await using var transaction = await _db.Database.BeginTransactionAsync();
-
-        // Two patients can confirm the same moment at the same time. Without this lock both would
-        // see the moment as free and both would save it. The lock lets only one booking at a time
-        // check and save the planning of this specialist, the other one waits until the transaction ends.
-        await LockPlanningAsync(request.SpecialistId);
-
-        // Same overlap rule as Overlaps(), written out here so the database can run it.
-        var isTaken = await BookedTimeSlots(request.SpecialistId, request.Date)
-            .AnyAsync(t => t.StartTime < end && start < t.EndTime);
-        if (isTaken)
+        // The check and the save happen inside the lock, so two patients cannot both book the same moment.
+        return await _timeSlotRepository.RunWithPlanningLockAsync(request.SpecialistId, async () =>
         {
-            return BookingResult.SlotNotAvailable;
-        }
+            if (await _timeSlotRepository.IsTakenAsync(request.SpecialistId, request.Date, start, end))
+            {
+                return BookingResult.SlotNotAvailable;
+            }
 
-        var timeSlot = new TimeSlot
-        {
-            EmployeeId = request.SpecialistId,
-            Date = request.Date.ToDateTime(TimeOnly.MinValue),
-            StartTime = start,
-            EndTime = end
-        };
-        timeSlot.Appointments.Add(new Appointment { PatientBSN = patient.BSN });
+            var timeSlot = new TimeSlot
+            {
+                EmployeeId = request.SpecialistId,
+                Date = request.Date.ToDateTime(TimeOnly.MinValue),
+                StartTime = start,
+                EndTime = end
+            };
+            timeSlot.Appointments.Add(new Appointment { PatientBSN = patient.BSN });
 
-        _db.TimeSlots.Add(timeSlot);
-        await _db.SaveChangesAsync();
-        await transaction.CommitAsync();
-
-        return BookingResult.Booked;
+            await _timeSlotRepository.AddAsync(timeSlot);
+            return BookingResult.Booked;
+        });
     }
 
-    // Touching is not overlapping: 9:15-10:00 and 10:00-10:45 are both allowed.
+    // Same overlap rule as TimeSlotRepository.IsTakenAsync(). Touching is not overlapping: 9:15-10:00 and 10:00-10:45 are both allowed.
     private static bool Overlaps(TimeSpan startA, TimeSpan endA, TimeSpan startB, TimeSpan endB) =>
         startA < endB && startB < endA;
-
-    private IQueryable<TimeSlot> BookedTimeSlots(int specialistId, DateOnly date)
-    {
-        var day = date.ToDateTime(TimeOnly.MinValue);
-
-        return _db.TimeSlots.Where(t =>
-            t.EmployeeId == specialistId &&
-            t.Date == day &&
-            t.Appointments.Any(a => a.Status != AppointmentStatus.Cancelled));
-    }
-
-    private Task LockPlanningAsync(int specialistId)
-    {
-        var resource = $"planning-specialist-{specialistId}";
-
-        return _db.Database.ExecuteSqlInterpolatedAsync($"""
-            DECLARE @result int;
-            EXEC @result = sp_getapplock @Resource = {resource}, @LockMode = 'Exclusive', @LockOwner = 'Transaction', @LockTimeout = 10000;
-            IF @result < 0 THROW 50000, 'Could not lock the planning of the specialist.', 1;
-            """);
-    }
 
     private static bool TryGetTimes(BookAppointmentRequest request, out TimeSpan start, out TimeSpan end)
     {

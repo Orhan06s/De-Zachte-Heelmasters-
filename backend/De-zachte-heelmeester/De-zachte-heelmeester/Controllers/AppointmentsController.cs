@@ -20,9 +20,9 @@ public class AppointmentsController : ControllerBase
     private const string SpecialistNotFoundMessage = "Deze specialist bestaat niet.";
     private const string PatientNotFoundMessage = "Alleen een patiënt kan een afspraak maken.";
 
-    private readonly AppointmentService _appointmentService;
+    private readonly IAppointmentService _appointmentService;
 
-    public AppointmentsController(AppointmentService appointmentService)
+    public AppointmentsController(IAppointmentService appointmentService)
     {
         _appointmentService = appointmentService;
     }
