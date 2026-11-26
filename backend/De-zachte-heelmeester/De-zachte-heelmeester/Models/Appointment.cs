@@ -8,7 +8,7 @@ namespace De_zachte_heelmeester.Models
         public int AppointmentId { get; set; }
 
         [Required]
-        public string PatientBSN { get; set; } = string.Empty;
+        public string PatientBSN { get; set; } = String.Empty;
 
         [Required]
         public int TimeSlotId { get; set; }

@@ -1,6 +1,8 @@
 
 using De_zachte_heelmeester.Data;
 using De_zachte_heelmeester.Models;
+using De_zachte_heelmeester.Repositories;
+using De_zachte_heelmeester.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,12 +37,46 @@ namespace De_zachte_heelmeester
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+            // Authentication with the standard Identity cookie
+            builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+
+                options.Events.OnRedirectToLogin = context =>
+                // An API returns a status code instead of redirecting to a login page
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return Task.CompletedTask;
+                };
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    return Task.CompletedTask;
+                };
+            });
+
             // Add services to the container
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
 
             builder.Services.AddDataProtection();
-
+                        
+            builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+            
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("VueFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+            
             var app = builder.Build();
 
              // Database: migrations only locally (online the pipeline does this), roles always
@@ -48,13 +84,15 @@ namespace De_zachte_heelmeester
             {
                 var context = scope.ServiceProvider
                     .GetRequiredService<ApplicationDbContext>();
+                var roleManager = scope.ServiceProvider
+                    .GetRequiredService<RoleManager<IdentityRole>>();
 
                 if (app.Environment.IsDevelopment())
                 {
                     await context.Database.MigrateAsync();
                 }
 
-                await DbSeeder.SeedAsync(context);
+                await DbSeeder.SeedAsync(context, roleManager);
             }
             // Configure HTTP request pipeline
             if (app.Environment.IsDevelopment())
@@ -67,6 +105,7 @@ namespace De_zachte_heelmeester
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
+            app.UseCors("VueFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
 
