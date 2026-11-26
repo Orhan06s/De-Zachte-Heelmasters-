@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using De_zachte_heelmeester.Data;
 using De_zachte_heelmeester.Models;
+using De_zachte_heelmeester.Validators;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -70,7 +71,7 @@ public static class AppointmentTestHelpers
 
             db.Patients.Add(new Patient
             {
-                BSN = Random.Shared.Next(100_000_000, 1_000_000_000).ToString(),
+                BSN = CreateValidBsn(),
                 UserId = user.Id,
                 FirstName = "Test",
                 LastName = "Patient",
@@ -137,6 +138,19 @@ public static class AppointmentTestHelpers
             a.TimeSlot.EmployeeId == specialistId &&
             a.TimeSlot.Date == day &&
             a.Status != AppointmentStatus.Cancelled);
+    }
+
+    // The database only accepts a BSN that passes the elfproef (CK_Patients_BSN)
+    private static string CreateValidBsn()
+    {
+        while (true)
+        {
+            var bsn = Random.Shared.Next(100_000_000, 1_000_000_000).ToString();
+            if (BsnValidator.IsValid(bsn))
+            {
+                return bsn;
+            }
+        }
     }
 
     private sealed record AvailableSlot(string StartTime, string EndTime);
