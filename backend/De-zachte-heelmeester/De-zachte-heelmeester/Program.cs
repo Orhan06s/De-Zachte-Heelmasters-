@@ -37,6 +37,26 @@ namespace De_zachte_heelmeester
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+            // Authentication with the standard Identity cookie
+            builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+
+                options.Events.OnRedirectToLogin = context =>
+                // An API returns a status code instead of redirecting to a login page
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return Task.CompletedTask;
+                };
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    return Task.CompletedTask;
+                };
+            });
+
             // Add services to the container
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
@@ -64,8 +84,10 @@ namespace De_zachte_heelmeester
             {
                 var context = scope.ServiceProvider
                     .GetRequiredService<ApplicationDbContext>();
+                var roleManager = scope.ServiceProvider
+                    .GetRequiredService<RoleManager<IdentityRole>>();
 
-                await DbSeeder.SeedAsync(context);
+                await DbSeeder.SeedAsync(context, roleManager);
             }
 
             // Configure HTTP request pipeline
