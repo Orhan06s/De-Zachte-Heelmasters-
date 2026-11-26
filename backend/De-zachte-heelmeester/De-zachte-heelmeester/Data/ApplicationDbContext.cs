@@ -19,6 +19,8 @@ namespace De_zachte_heelmeester.Data
         public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
         public DbSet<Appointment> Appointments => Set<Appointment>();
         public DbSet<UserSession> UserSessions => Set<UserSession>();
+        public DbSet<LoginLink> LoginLinks => Set<LoginLink>();
+        public DbSet<EmailMessage> EmailMessages => Set<EmailMessage>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -92,6 +94,17 @@ namespace De_zachte_heelmeester.Data
                 .Property(s => s.RefreshTokenHash)
                 .HasMaxLength(256)
                 .IsRequired();
+
+            // ApplicationUser - LoginLink (1 to many)
+            builder.Entity<LoginLink>()
+                .HasOne(l => l.User)
+                .WithMany()
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<LoginLink>()
+                .HasIndex(l => l.TokenHash)
+                .IsUnique();
         }
     }
 }
