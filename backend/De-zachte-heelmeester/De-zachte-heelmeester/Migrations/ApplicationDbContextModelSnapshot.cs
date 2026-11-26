@@ -42,7 +42,7 @@ namespace De_zachte_heelmeester.Migrations
 
                     b.HasKey("AppointmentId");
 
-                    b.HasIndex("PatientId");
+                    b.HasIndex("PatientBSN");
 
                     b.HasIndex("TimeSlotId");
 
@@ -104,7 +104,7 @@ namespace De_zachte_heelmeester.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("PatientId");
+                    b.HasKey("BSN");
 
                     b.HasIndex("BSN")
                         .IsUnique();
@@ -387,7 +387,7 @@ namespace De_zachte_heelmeester.Migrations
                 {
                     b.HasOne("De_zachte_heelmeester.Models.Patient", "Patient")
                         .WithMany("Appointments")
-                        .HasForeignKey("PatientId")
+                        .HasForeignKey("PatientBSN")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
