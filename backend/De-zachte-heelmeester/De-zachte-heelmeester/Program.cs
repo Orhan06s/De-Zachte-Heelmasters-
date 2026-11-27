@@ -89,6 +89,18 @@ namespace De_zachte_heelmeester
 
             app.MapControllers();
 
+            app.MapGet("/api/test-role/{email}", async (
+    string email,
+    UserManager<User> userManager,
+    RoleLoginService roleService) =>
+            {
+                var user = await userManager.FindByEmailAsync(email);
+                if (user == null) return Results.NotFound("Gebruiker niet gevonden.");
+
+                var result = await roleService.ResolveLoginRolesAsync(user);
+                return Results.Ok(result);
+            });
+
             app.Run();
         }
     }
