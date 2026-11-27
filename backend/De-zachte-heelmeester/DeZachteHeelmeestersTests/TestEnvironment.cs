@@ -24,6 +24,16 @@ public class TestEnvironment
     [AssemblyInitialize]
     public static async Task StartAsync(TestContext _)
     {
+        // Delete the old test database before the API starts. The API runs the migrations when it starts,
+        // and old test data can block a new migration. This connection only points to the test database.
+        var testDatabaseOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer(TestConnectionString)
+            .Options;
+        await using (var oldDb = new ApplicationDbContext(testDatabaseOptions))
+        {
+            await oldDb.Database.EnsureDeletedAsync();
+        }
+
         // The API also reads the connection string from environment variables, so it uses the test database.
         Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection", TestConnectionString);
         Api = new WebApplicationFactory<Program>();
@@ -31,13 +41,11 @@ public class TestEnvironment
         using var scope = Api.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        // Safety check: only the test database may be deleted.
+        // Safety check: the tests may only write to the test database.
         if (db.Database.GetConnectionString()?.Contains(TestDatabaseName) != true)
         {
             throw new InvalidOperationException("The tests are not using the test database. Stopped to protect data.");
         }
-
-        await db.Database.EnsureDeletedAsync();
 
         // The same seeder as the API: migrations and roles
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
