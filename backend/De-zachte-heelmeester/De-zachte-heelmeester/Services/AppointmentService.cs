@@ -29,30 +29,29 @@ public class AppointmentService : IAppointmentService
         _clock = clock;
     }
 
-    public Task<bool> SpecialistExistsAsync(int specialistId) =>
-        _employeeRepository.ExistsAsync(specialistId);
-
     /// <summary>
-    /// Returns every start time on the day where an appointment of the given length fits
-    /// within the working hours without overlapping an appointment that is already booked.
+    /// Returns the referrals of the logged-in patient, newest first. Empty when the patient has no referral.
     /// </summary>
-    public async Task<List<AvailableSlotResponse>> GetAvailableSlotsAsync(int specialistId, DateOnly date, int durationQuarters)
+    public async Task<List<ReferralResponse>> GetReferralsAsync(string userId)
     {
-        if (!IsBookableDay(date) || !IsValidDuration(durationQuarters))
+        var patient = await _patientRepository.GetByUserIdAsync(userId);
+        if (patient == null)
         {
-            return new List<AvailableSlotResponse>();
+            return new List<ReferralResponse>();
         }
 
-        var freeTimes = await GetFreeTimesAsync(specialistId, date, durationQuarters);
-        return freeTimes.Select(t => new AvailableSlotResponse(Format(t.Start), Format(t.End))).ToList();
+        var referrals = await _referralRepository.GetByPatientBsnAsync(patient.BSN);
+        return referrals
+            .Select(r => new ReferralResponse(r.ReferralId, r.CareCode, r.CareTreatment.Description))
+            .ToList();
     }
 
     /// <summary>
-    /// Returns the free moments for the referral of the logged-in patient, for seven days starting at the given date.
+    /// Returns the free moments for the referral of the logged-in patient, for seven days starting at the given date (today when empty).
     /// Only specialists with the specialism of the care code, only on the days they work,
     /// with the duration from the list of care treatments.
     /// </summary>
-    public async Task<ReferralSlotsResult> GetAvailableSlotsForReferralAsync(string userId, int referralId, DateOnly from)
+    public async Task<ReferralSlotsResult> GetAvailableSlotsForReferralAsync(string userId, int referralId, DateOnly? from)
     {
         var referral = await GetReferralOfPatientAsync(userId, referralId);
         if (referral == null)
@@ -63,8 +62,9 @@ public class AppointmentService : IAppointmentService
         var treatment = referral.CareTreatment;
         var specialists = await _employeeRepository.GetBySpecializationAsync(treatment.Specialization);
         var slots = new List<ReferralSlotResponse>();
+        var firstDay = from ?? DateOnly.FromDateTime(DutchNow());
 
-        for (var date = from; date < from.AddDays(7); date = date.AddDays(1))
+        for (var date = firstDay; date < firstDay.AddDays(7); date = date.AddDays(1))
         {
             foreach (var specialist in specialists.Where(s => WorkingHours.IsWorkingDay(s.WorkDays, date)))
             {
@@ -86,14 +86,8 @@ public class AppointmentService : IAppointmentService
     /// </summary>
     public async Task<BookingResult> BookAsync(string userId, BookAppointmentRequest request)
     {
-        var patient = await _patientRepository.GetByUserIdAsync(userId);
-        if (patient == null)
-        {
-            return BookingResult.PatientNotFound;
-        }
-
-        var referral = await _referralRepository.GetByIdAsync(request.ReferralId);
-        if (referral == null || referral.PatientBSN != patient.BSN)
+        var referral = await GetReferralOfPatientAsync(userId, request.ReferralId);
+        if (referral == null)
         {
             return BookingResult.ReferralNotFound;
         }
@@ -128,7 +122,7 @@ public class AppointmentService : IAppointmentService
                 StartTime = start,
                 EndTime = end
             };
-            timeSlot.Appointments.Add(new Appointment { PatientBSN = patient.BSN, ReferralId = referral.ReferralId });
+            timeSlot.Appointments.Add(new Appointment { PatientBSN = referral.PatientBSN, ReferralId = referral.ReferralId });
 
             await _timeSlotRepository.AddAsync(timeSlot);
             return BookingResult.Booked;
@@ -193,9 +187,6 @@ public class AppointmentService : IAppointmentService
     // True when the moment lies before the current time. A moment that has started is no longer free.
     private bool HasPassed(DateOnly date, TimeSpan start) =>
         date.ToDateTime(TimeOnly.FromTimeSpan(start)) < DutchNow();
-
-    private bool IsBookableDay(DateOnly date) =>
-        WorkingHours.IsWorkingDay(date) && date >= DateOnly.FromDateTime(DutchNow());
 
     // The current time in the Netherlands, whatever time zone the server uses.
     private DateTime DutchNow() =>

@@ -13,11 +13,6 @@ public class EmployeeRepository : IEmployeeRepository
         _context = context;
     }
 
-    public async Task<bool> ExistsAsync(int employeeId)
-    {
-        return await _context.Employees.AnyAsync(e => e.EmployeeId == employeeId);
-    }
-
     public async Task<List<Employee>> GetBySpecializationAsync(string specialization)
     {
         return await _context.Employees

@@ -18,9 +18,6 @@ public static class WorkingHours
 
     public static int QuartersPerDay => (int)((End - Start) / Quarter);
 
-    public static bool IsWorkingDay(DateOnly date) =>
-        date.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday);
-
     /// <summary>
     /// True when the date falls on one of the work days of the specialist.
     /// </summary>
