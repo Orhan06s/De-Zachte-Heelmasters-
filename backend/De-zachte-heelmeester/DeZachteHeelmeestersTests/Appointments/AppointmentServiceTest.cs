@@ -15,6 +15,7 @@ public class AppointmentServiceTest
     private Mock<IPatientRepository> _mockPatientRepository = null!;
     private Mock<ITimeSlotRepository> _mockTimeSlotRepository = null!;
     private Mock<IReferralRepository> _mockReferralRepository = null!;
+    private Mock<TimeProvider> _mockClock = null!;
     private AppointmentService _appointmentService = null!;
 
     [TestInitialize]
@@ -25,9 +26,17 @@ public class AppointmentServiceTest
         _mockTimeSlotRepository = new Mock<ITimeSlotRepository>();
         _mockReferralRepository = new Mock<IReferralRepository>();
 
+        // The clock shows the real time, unless a test sets it
+        _mockClock = new Mock<TimeProvider>();
+        _mockClock.Setup(c => c.GetUtcNow()).Returns(DateTimeOffset.UtcNow);
+
         // The logged-in user is the patient with this BSN
         _mockPatientRepository.Setup(r => r.GetByUserIdAsync(UserId))
             .ReturnsAsync(new Patient { BSN = Bsn, UserId = UserId });
+
+        // No appointments are booked yet
+        _mockTimeSlotRepository.Setup(r => r.GetBookedAsync(It.IsAny<int>(), It.IsAny<DateOnly>()))
+            .ReturnsAsync(new List<TimeSlot>());
 
         // The lock just runs the work, there is no database in a unit test
         _mockTimeSlotRepository
@@ -38,7 +47,8 @@ public class AppointmentServiceTest
             _mockEmployeeRepository.Object,
             _mockPatientRepository.Object,
             _mockTimeSlotRepository.Object,
-            _mockReferralRepository.Object);
+            _mockReferralRepository.Object,
+            _mockClock.Object);
     }
 
     [TestMethod]
@@ -87,6 +97,61 @@ public class AppointmentServiceTest
         // Assert
         Assert.IsTrue(result.Slots.Any(s => s.Date == monday), "There are slots on Monday.");
         Assert.IsFalse(result.Slots.Any(s => s.Date.DayOfWeek == DayOfWeek.Friday), "No slots on a day the specialist does not work.");
+    }
+
+    [TestMethod]
+    [TestProperty("AFS-01", "AC1")]
+    public async Task GetAvailableTimeSlotsAsync_Today_ReturnsNoSlotsThatHavePassed()
+    {
+        // Arrange: it is Monday 12:50
+        var monday = NextMonday(DateTime.Today.AddDays(7));
+        SetDutchTime(monday.ToDateTime(new TimeOnly(12, 50)));
+        SetupReferral(CardiologyReferral());
+        SetupSpecialists("Cardiologie", new Employee { EmployeeId = 10, Name = "Dr. Jansen", Specialization = "Cardiologie" });
+
+        // Act
+        var result = await _appointmentService.GetAvailableSlotsForReferralAsync(UserId, 1, monday);
+
+        // Assert: the first free moment today is 13:00
+        var first = result.Slots[0];
+        Assert.AreEqual(monday, first.Date);
+        Assert.AreEqual("13:00", first.StartTime, "A moment that has already passed is not a free moment.");
+    }
+
+    [TestMethod]
+    [TestProperty("AFS-01", "AC1")]
+    public async Task GetAvailableTimeSlotsAsync_ServerRunsOnUtc_UsesDutchTime()
+    {
+        // Arrange: a Monday in winter, the server clock says 11:50 UTC. In the Netherlands it is 12:50.
+        var monday = MondayInJanuary();
+        _mockClock.Setup(c => c.LocalTimeZone).Returns(TimeZoneInfo.Utc);
+        _mockClock.Setup(c => c.GetUtcNow()).Returns(new DateTimeOffset(monday.ToDateTime(new TimeOnly(11, 50)), TimeSpan.Zero));
+        SetupReferral(CardiologyReferral());
+        SetupSpecialists("Cardiologie", new Employee { EmployeeId = 10, Name = "Dr. Jansen", Specialization = "Cardiologie" });
+
+        // Act
+        var result = await _appointmentService.GetAvailableSlotsForReferralAsync(UserId, 1, monday);
+
+        // Assert: 12:00 and 12:30 have already passed in the Netherlands
+        Assert.AreEqual("13:00", result.Slots[0].StartTime, "The hospital works on Dutch time, not on the time of the server.");
+    }
+
+    [TestMethod]
+    [TestProperty("AFS-01", "AC2")]
+    public async Task BookAppointmentAsync_MomentEarlierToday_DoesNotSaveAppointment()
+    {
+        // Arrange: it is Monday 12:50, the patient tries to book 10:00 that day
+        var monday = NextMonday(DateTime.Today.AddDays(7));
+        SetDutchTime(monday.ToDateTime(new TimeOnly(12, 50)));
+        SetupReferral(CardiologyReferral());
+        SetupSpecialists("Cardiologie", new Employee { EmployeeId = 10, Name = "Dr. Jansen", Specialization = "Cardiologie" });
+
+        // Act
+        var result = await _appointmentService.BookAsync(UserId, BookingRequest(monday, "10:00"));
+
+        // Assert
+        Assert.AreEqual(BookingResult.InvalidRequest, result);
+        _mockTimeSlotRepository.Verify(r => r.AddAsync(It.IsAny<TimeSlot>()), Times.Never);
     }
 
     [TestMethod]
@@ -206,11 +271,19 @@ public class AppointmentServiceTest
         StartTime = startTime
     };
 
+    // Sets the clock to the given Dutch time.
+    private void SetDutchTime(DateTime dutchTime) =>
+        _mockClock.Setup(c => c.GetUtcNow())
+            .Returns(new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(dutchTime, WorkingHours.TimeZone)));
+
     private void SetupReferral(Referral referral) =>
         _mockReferralRepository.Setup(r => r.GetByIdAsync(referral.ReferralId)).ReturnsAsync(referral);
 
     private void SetupSpecialists(string specialization, params Employee[] specialists) =>
         _mockEmployeeRepository.Setup(r => r.GetBySpecializationAsync(specialization)).ReturnsAsync(specialists.ToList());
+
+    // The first Monday of January next year. Always in the future and always in winter time (UTC+1).
+    private static DateOnly MondayInJanuary() => NextMonday(new DateTime(DateTime.Today.Year + 1, 1, 1));
 
     // The first Monday on or after the given day. Always a working day, so the tests do not depend on today's date.
     private static DateOnly NextMonday(DateTime from)

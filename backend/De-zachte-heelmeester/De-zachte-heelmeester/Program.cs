@@ -70,6 +70,7 @@ namespace De_zachte_heelmeester
             builder.Services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
             builder.Services.AddScoped<IReferralRepository, ReferralRepository>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+            builder.Services.AddSingleton(TimeProvider.System);
             
             builder.Services.AddCors(options =>
             {

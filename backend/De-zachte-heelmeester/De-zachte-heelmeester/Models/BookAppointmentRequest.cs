@@ -12,6 +12,4 @@ public class BookAppointmentRequest
     public DateOnly Date { get; set; }
 
     public string StartTime { get; set; } = string.Empty;
-
-    public int DurationQuarters { get; set; }
 }
