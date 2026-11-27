@@ -6,6 +6,8 @@ namespace DeZachteHeelmeestersTests.Appointments;
 /// AFS-02 No double bookings.
 /// Integration tests for test cases TC-AFS-05 to TC-AFS-07 from the test plan.
 /// Assumptions: a specialist works Monday to Friday from 9:00 to 17:00 and available slots start every quarter of an hour.
+/// Since AFS-01 a patient books through a referral. The duration comes from the care code:
+/// Z0003 "Consult longen" takes 2 quarters, Z0001 "Consult hart" takes 3 quarters.
 /// </summary>
 [TestClass]
 public class NoDoubleBookingsIntegrationTest
@@ -18,16 +20,18 @@ public class NoDoubleBookingsIntegrationTest
     public async Task TC_AFS_05_BookedSlot_IsNotOffered()
     {
         // Arrange
-        var specialistId = await AppointmentTestHelpers.CreateSpecialistAsync();
+        var specialistId = await AppointmentTestHelpers.CreateSpecialistAsync("Longgeneeskunde");
         var date = AppointmentTestHelpers.MondayInFourWeeks();
         using var patientA = await AppointmentTestHelpers.LoggedInPatientAsync();
         using var patientB = await AppointmentTestHelpers.LoggedInPatientAsync();
+        var referralA = await AppointmentTestHelpers.CreateReferralAsync(patientA, "Z0003");
+        var referralB = await AppointmentTestHelpers.CreateReferralAsync(patientB, "Z0003");
 
-        var booking = await AppointmentTestHelpers.BookAsync(patientA, specialistId, date, "11:00", 2);
+        var booking = await AppointmentTestHelpers.BookAsync(patientA, referralA, specialistId, date, "11:00");
         Assert.AreEqual(HttpStatusCode.Created, booking.StatusCode, "The first booking should succeed.");
 
         // Act
-        var slots = await AppointmentTestHelpers.GetAvailableSlotsAsync(patientB, specialistId, date, 2);
+        var slots = await AppointmentTestHelpers.GetStartTimesAsync(patientB, referralB, specialistId, date);
 
         // Assert
         CollectionAssert.DoesNotContain(slots, "11:00", "A booked slot should not be offered.");
@@ -40,16 +44,18 @@ public class NoDoubleBookingsIntegrationTest
     public async Task TC_AFS_06_OverlappingSlot_IsNotOffered()
     {
         // Arrange
-        var specialistId = await AppointmentTestHelpers.CreateSpecialistAsync();
+        var specialistId = await AppointmentTestHelpers.CreateSpecialistAsync("Cardiologie");
         var date = AppointmentTestHelpers.MondayInFourWeeks();
         using var patientA = await AppointmentTestHelpers.LoggedInPatientAsync();
         using var patientB = await AppointmentTestHelpers.LoggedInPatientAsync();
+        var referralA = await AppointmentTestHelpers.CreateReferralAsync(patientA, "Z0001");
+        var referralB = await AppointmentTestHelpers.CreateReferralAsync(patientB, "Z0001");
 
-        var booking = await AppointmentTestHelpers.BookAsync(patientA, specialistId, date, "10:00", 3);
+        var booking = await AppointmentTestHelpers.BookAsync(patientA, referralA, specialistId, date, "10:00");
         Assert.AreEqual(HttpStatusCode.Created, booking.StatusCode, "The appointment from 10:00 to 10:45 should succeed.");
 
         // Act
-        var slots = await AppointmentTestHelpers.GetAvailableSlotsAsync(patientB, specialistId, date, 3);
+        var slots = await AppointmentTestHelpers.GetStartTimesAsync(patientB, referralB, specialistId, date);
 
         // Assert
         foreach (var time in new[] { "09:30", "09:45", "10:00", "10:15", "10:30" })
@@ -67,15 +73,17 @@ public class NoDoubleBookingsIntegrationTest
     public async Task TC_AFS_07_TwoPatientsAtOnce_OneSucceedsOtherGetsMessage()
     {
         // Arrange
-        var specialistId = await AppointmentTestHelpers.CreateSpecialistAsync();
+        var specialistId = await AppointmentTestHelpers.CreateSpecialistAsync("Longgeneeskunde");
         var date = AppointmentTestHelpers.MondayInFourWeeks();
         using var patientA = await AppointmentTestHelpers.LoggedInPatientAsync();
         using var patientB = await AppointmentTestHelpers.LoggedInPatientAsync();
+        var referralA = await AppointmentTestHelpers.CreateReferralAsync(patientA, "Z0003");
+        var referralB = await AppointmentTestHelpers.CreateReferralAsync(patientB, "Z0003");
 
         // Act
         var responses = await Task.WhenAll(
-            AppointmentTestHelpers.BookAsync(patientA, specialistId, date, "14:00", 2),
-            AppointmentTestHelpers.BookAsync(patientB, specialistId, date, "14:00", 2));
+            AppointmentTestHelpers.BookAsync(patientA, referralA, specialistId, date, "14:00"),
+            AppointmentTestHelpers.BookAsync(patientB, referralB, specialistId, date, "14:00"));
 
         // Assert
         Assert.AreEqual(1, responses.Count(r => r.StatusCode == HttpStatusCode.Created), "Exactly one booking should succeed.");
@@ -86,7 +94,7 @@ public class NoDoubleBookingsIntegrationTest
 
         Assert.AreEqual(1, await AppointmentTestHelpers.CountAppointmentsAsync(specialistId, date), "Only one appointment should be saved.");
 
-        var slots = await AppointmentTestHelpers.GetAvailableSlotsAsync(patientB, specialistId, date, 2);
+        var slots = await AppointmentTestHelpers.GetStartTimesAsync(patientB, referralB, specialistId, date);
         CollectionAssert.DoesNotContain(slots, "14:00", "The booked slot should no longer be offered.");
     }
 }
