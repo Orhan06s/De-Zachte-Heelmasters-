@@ -16,6 +16,9 @@ namespace De_zachte_heelmeester.Models
         [Required]
         public string Specialization { get; set; } = string.Empty;
 
+        // The days this specialist works. The screen to change them comes with AFS-08.
+        public WorkDays WorkDays { get; set; } = WorkDays.MondayToFriday;
+
         public User User { get; set; } = null!;
 
         public ICollection<TimeSlot> TimeSlots { get; set; }

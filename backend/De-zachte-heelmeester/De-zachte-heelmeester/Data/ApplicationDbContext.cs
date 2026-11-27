@@ -19,6 +19,8 @@ namespace De_zachte_heelmeester.Data
         public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
         public DbSet<Appointment> Appointments => Set<Appointment>();
         public DbSet<UserSession> UserSessions => Set<UserSession>();
+        public DbSet<Referral> Referrals => Set<Referral>();
+        public DbSet<CareTreatment> CareTreatments => Set<CareTreatment>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -75,6 +77,31 @@ namespace De_zachte_heelmeester.Data
                 .WithMany(t => t.Appointments)
                 .HasForeignKey(a => a.TimeSlotId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Referral - Appointment (1 to many)
+            builder.Entity<Appointment>()
+                .HasOne(a => a.Referral)
+                .WithMany(r => r.Appointments)
+                .HasForeignKey(a => a.ReferralId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Patient - Referral (1 to many)
+            builder.Entity<Referral>()
+                .HasOne(r => r.Patient)
+                .WithMany()
+                .HasForeignKey(r => r.PatientBSN)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // CareTreatment - Referral (1 to many)
+            builder.Entity<Referral>()
+                .HasOne(r => r.CareTreatment)
+                .WithMany()
+                .HasForeignKey(r => r.CareCode)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // List of care treatments from the case, filled by the migration
+            builder.Entity<CareTreatment>()
+                .HasData(CareTreatmentData.All);
 
             // AppointmentStatus stored as string
             builder.Entity<Appointment>()

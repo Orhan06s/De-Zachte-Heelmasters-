@@ -34,6 +34,9 @@ namespace De_zachte_heelmeester.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(9)");
 
+                    b.Property<int>("ReferralId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -45,9 +48,735 @@ namespace De_zachte_heelmeester.Migrations
 
                     b.HasIndex("PatientBSN");
 
+                    b.HasIndex("ReferralId");
+
                     b.HasIndex("TimeSlotId");
 
                     b.ToTable("Appointments");
+                });
+
+            modelBuilder.Entity("De_zachte_heelmeester.Models.CareTreatment", b =>
+                {
+                    b.Property<string>("CareCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DurationQuarters")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Specialization")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CareCode");
+
+                    b.ToTable("CareTreatments");
+
+                    b.HasData(
+                        new
+                        {
+                            CareCode = "Z0001",
+                            Description = "Consult hart",
+                            DurationQuarters = 3,
+                            Specialization = "Cardiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0002",
+                            Description = "Consult huid",
+                            DurationQuarters = 3,
+                            Specialization = "Dermatologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0003",
+                            Description = "Consult longen",
+                            DurationQuarters = 2,
+                            Specialization = "Longgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0004",
+                            Description = "Consult ogen",
+                            DurationQuarters = 3,
+                            Specialization = "Oogheelkunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0005",
+                            Description = "Consult oren",
+                            DurationQuarters = 3,
+                            Specialization = "KNO"
+                        },
+                        new
+                        {
+                            CareCode = "Z0006",
+                            Description = "Operatie knie",
+                            DurationQuarters = 2,
+                            Specialization = "Orthopedie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0007",
+                            Description = "Operatie heup",
+                            DurationQuarters = 3,
+                            Specialization = "Orthopedie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0008",
+                            Description = "Operatie hart",
+                            DurationQuarters = 4,
+                            Specialization = "Cardiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0009",
+                            Description = "Operatie huid",
+                            DurationQuarters = 4,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0010",
+                            Description = "Operatie rug",
+                            DurationQuarters = 3,
+                            Specialization = "Orthopedie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0011",
+                            Description = "Controle hart",
+                            DurationQuarters = 3,
+                            Specialization = "Cardiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0012",
+                            Description = "Controle huid",
+                            DurationQuarters = 4,
+                            Specialization = "Dermatologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0013",
+                            Description = "Controle longen",
+                            DurationQuarters = 3,
+                            Specialization = "Longgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0014",
+                            Description = "Controle ogen",
+                            DurationQuarters = 3,
+                            Specialization = "Oogheelkunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0015",
+                            Description = "Controle oren",
+                            DurationQuarters = 4,
+                            Specialization = "KNO"
+                        },
+                        new
+                        {
+                            CareCode = "Z0016",
+                            Description = "MRI-scan hoofd",
+                            DurationQuarters = 2,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0017",
+                            Description = "MRI-scan knie",
+                            DurationQuarters = 3,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0018",
+                            Description = "MRI-scan rug",
+                            DurationQuarters = 3,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0019",
+                            Description = "MRI-scan hart",
+                            DurationQuarters = 2,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0020",
+                            Description = "MRI-scan buik",
+                            DurationQuarters = 2,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0021",
+                            Description = "CT-scan hoofd",
+                            DurationQuarters = 3,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0022",
+                            Description = "CT-scan knie",
+                            DurationQuarters = 3,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0023",
+                            Description = "CT-scan rug",
+                            DurationQuarters = 3,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0024",
+                            Description = "CT-scan hart",
+                            DurationQuarters = 3,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0025",
+                            Description = "CT-scan buik",
+                            DurationQuarters = 4,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0026",
+                            Description = "Bloedonderzoek algemeen",
+                            DurationQuarters = 1,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0027",
+                            Description = "Bloedonderzoek hormonen",
+                            DurationQuarters = 2,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0028",
+                            Description = "Bloedonderzoek infecties",
+                            DurationQuarters = 1,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0029",
+                            Description = "Bloedonderzoek suiker",
+                            DurationQuarters = 4,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0030",
+                            Description = "Bloedonderzoek cholesterol",
+                            DurationQuarters = 3,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0031",
+                            Description = "Fysiotherapie knie",
+                            DurationQuarters = 1,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0032",
+                            Description = "Fysiotherapie rug",
+                            DurationQuarters = 3,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0033",
+                            Description = "Fysiotherapie schouder",
+                            DurationQuarters = 2,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0034",
+                            Description = "Fysiotherapie heup",
+                            DurationQuarters = 4,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0035",
+                            Description = "Fysiotherapie nek",
+                            DurationQuarters = 1,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0036",
+                            Description = "Psychologisch gesprek depressie",
+                            DurationQuarters = 4,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0037",
+                            Description = "Psychologisch gesprek angst",
+                            DurationQuarters = 3,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0038",
+                            Description = "Psychologisch gesprek trauma",
+                            DurationQuarters = 1,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0039",
+                            Description = "Psychologisch gesprek burn-out",
+                            DurationQuarters = 3,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0040",
+                            Description = "Psychologisch gesprek stress",
+                            DurationQuarters = 4,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0041",
+                            Description = "Vaccinatie griep",
+                            DurationQuarters = 3,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0042",
+                            Description = "Vaccinatie hepatitis",
+                            DurationQuarters = 2,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0043",
+                            Description = "Vaccinatie tetanus",
+                            DurationQuarters = 1,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0044",
+                            Description = "Vaccinatie covid",
+                            DurationQuarters = 2,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0045",
+                            Description = "Vaccinatie HPV",
+                            DurationQuarters = 4,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0046",
+                            Description = "Wondverzorging arm",
+                            DurationQuarters = 2,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0047",
+                            Description = "Wondverzorging been",
+                            DurationQuarters = 2,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0048",
+                            Description = "Wondverzorging hoofd",
+                            DurationQuarters = 2,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0049",
+                            Description = "Wondverzorging buik",
+                            DurationQuarters = 4,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0050",
+                            Description = "Wondverzorging rug",
+                            DurationQuarters = 4,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0051",
+                            Description = "Fysiotherapie rug",
+                            DurationQuarters = 1,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0052",
+                            Description = "Fysiotherapie schouder",
+                            DurationQuarters = 4,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0053",
+                            Description = "Wondverzorging rug",
+                            DurationQuarters = 4,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0054",
+                            Description = "Vaccinatie HPV",
+                            DurationQuarters = 4,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0055",
+                            Description = "Vaccinatie hepatitis",
+                            DurationQuarters = 1,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0056",
+                            Description = "Psychologisch gesprek stress",
+                            DurationQuarters = 1,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0057",
+                            Description = "Consult ogen",
+                            DurationQuarters = 1,
+                            Specialization = "Oogheelkunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0058",
+                            Description = "Operatie rug",
+                            DurationQuarters = 1,
+                            Specialization = "Orthopedie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0059",
+                            Description = "MRI-scan buik",
+                            DurationQuarters = 2,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0060",
+                            Description = "Controle huid",
+                            DurationQuarters = 3,
+                            Specialization = "Dermatologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0061",
+                            Description = "MRI-scan hoofd",
+                            DurationQuarters = 1,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0062",
+                            Description = "Controle longen",
+                            DurationQuarters = 4,
+                            Specialization = "Longgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0063",
+                            Description = "Bloedonderzoek algemeen",
+                            DurationQuarters = 4,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0064",
+                            Description = "Wondverzorging arm",
+                            DurationQuarters = 2,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0065",
+                            Description = "Operatie hart",
+                            DurationQuarters = 4,
+                            Specialization = "Cardiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0066",
+                            Description = "Consult huid",
+                            DurationQuarters = 2,
+                            Specialization = "Dermatologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0067",
+                            Description = "Psychologisch gesprek angst",
+                            DurationQuarters = 4,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0068",
+                            Description = "CT-scan knie",
+                            DurationQuarters = 1,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0069",
+                            Description = "Wondverzorging been",
+                            DurationQuarters = 1,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0070",
+                            Description = "Operatie huid",
+                            DurationQuarters = 4,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0071",
+                            Description = "Consult hart",
+                            DurationQuarters = 2,
+                            Specialization = "Cardiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0072",
+                            Description = "Consult oren",
+                            DurationQuarters = 4,
+                            Specialization = "KNO"
+                        },
+                        new
+                        {
+                            CareCode = "Z0073",
+                            Description = "Bloedonderzoek cholesterol",
+                            DurationQuarters = 3,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0074",
+                            Description = "Controle hart",
+                            DurationQuarters = 4,
+                            Specialization = "Cardiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0075",
+                            Description = "Vaccinatie griep",
+                            DurationQuarters = 4,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0076",
+                            Description = "CT-scan rug",
+                            DurationQuarters = 4,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0077",
+                            Description = "Bloedonderzoek hormonen",
+                            DurationQuarters = 2,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0078",
+                            Description = "Vaccinatie covid",
+                            DurationQuarters = 2,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0079",
+                            Description = "Psychologisch gesprek trauma",
+                            DurationQuarters = 1,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0080",
+                            Description = "MRI-scan hart",
+                            DurationQuarters = 2,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0081",
+                            Description = "Fysiotherapie heup",
+                            DurationQuarters = 2,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0082",
+                            Description = "MRI-scan knie",
+                            DurationQuarters = 1,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0083",
+                            Description = "Psychologisch gesprek burn-out",
+                            DurationQuarters = 4,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0084",
+                            Description = "CT-scan buik",
+                            DurationQuarters = 2,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0085",
+                            Description = "Consult longen",
+                            DurationQuarters = 2,
+                            Specialization = "Longgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0086",
+                            Description = "CT-scan hoofd",
+                            DurationQuarters = 4,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0087",
+                            Description = "Fysiotherapie knie",
+                            DurationQuarters = 1,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0088",
+                            Description = "Wondverzorging buik",
+                            DurationQuarters = 4,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0089",
+                            Description = "MRI-scan rug",
+                            DurationQuarters = 4,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0090",
+                            Description = "Psychologisch gesprek depressie",
+                            DurationQuarters = 2,
+                            Specialization = "Psychiatrie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0091",
+                            Description = "Operatie knie",
+                            DurationQuarters = 3,
+                            Specialization = "Orthopedie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0092",
+                            Description = "Fysiotherapie nek",
+                            DurationQuarters = 4,
+                            Specialization = "Revalidatiegeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0093",
+                            Description = "CT-scan hart",
+                            DurationQuarters = 1,
+                            Specialization = "Radiologie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0094",
+                            Description = "Controle ogen",
+                            DurationQuarters = 2,
+                            Specialization = "Oogheelkunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0095",
+                            Description = "Bloedonderzoek suiker",
+                            DurationQuarters = 1,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        },
+                        new
+                        {
+                            CareCode = "Z0096",
+                            Description = "Controle oren",
+                            DurationQuarters = 1,
+                            Specialization = "KNO"
+                        },
+                        new
+                        {
+                            CareCode = "Z0097",
+                            Description = "Wondverzorging hoofd",
+                            DurationQuarters = 1,
+                            Specialization = "Chirurgie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0098",
+                            Description = "Vaccinatie tetanus",
+                            DurationQuarters = 1,
+                            Specialization = "Algemeen"
+                        },
+                        new
+                        {
+                            CareCode = "Z0099",
+                            Description = "Operatie heup",
+                            DurationQuarters = 1,
+                            Specialization = "Orthopedie"
+                        },
+                        new
+                        {
+                            CareCode = "Z0100",
+                            Description = "Bloedonderzoek infecties",
+                            DurationQuarters = 4,
+                            Specialization = "Laboratoriumgeneeskunde"
+                        });
                 });
 
             modelBuilder.Entity("De_zachte_heelmeester.Models.Employee", b =>
@@ -69,6 +798,9 @@ namespace De_zachte_heelmeester.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("WorkDays")
+                        .HasColumnType("int");
 
                     b.HasKey("EmployeeId");
 
@@ -108,6 +840,33 @@ namespace De_zachte_heelmeester.Migrations
 
                             t.HasCheckConstraint("CK_Patients_Email", "[Email] IS NULL OR [Email] LIKE '%_@_%._%'");
                         });
+                });
+
+            modelBuilder.Entity("De_zachte_heelmeester.Models.Referral", b =>
+                {
+                    b.Property<int>("ReferralId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReferralId"));
+
+                    b.Property<string>("CareCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("PatientBSN")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("nvarchar(9)");
+
+                    b.HasKey("ReferralId");
+
+                    b.HasIndex("CareCode");
+
+                    b.HasIndex("PatientBSN");
+
+                    b.ToTable("Referrals");
                 });
 
             modelBuilder.Entity("De_zachte_heelmeester.Models.TimeSlot", b =>
@@ -387,6 +1146,12 @@ namespace De_zachte_heelmeester.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("De_zachte_heelmeester.Models.Referral", "Referral")
+                        .WithMany("Appointments")
+                        .HasForeignKey("ReferralId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("De_zachte_heelmeester.Models.TimeSlot", "TimeSlot")
                         .WithMany("Appointments")
                         .HasForeignKey("TimeSlotId")
@@ -394,6 +1159,8 @@ namespace De_zachte_heelmeester.Migrations
                         .IsRequired();
 
                     b.Navigation("Patient");
+
+                    b.Navigation("Referral");
 
                     b.Navigation("TimeSlot");
                 });
@@ -417,6 +1184,25 @@ namespace De_zachte_heelmeester.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("De_zachte_heelmeester.Models.Referral", b =>
+                {
+                    b.HasOne("De_zachte_heelmeester.Models.CareTreatment", "CareTreatment")
+                        .WithMany()
+                        .HasForeignKey("CareCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("De_zachte_heelmeester.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientBSN")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CareTreatment");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("De_zachte_heelmeester.Models.TimeSlot", b =>
@@ -498,6 +1284,11 @@ namespace De_zachte_heelmeester.Migrations
                 });
 
             modelBuilder.Entity("De_zachte_heelmeester.Models.Patient", b =>
+                {
+                    b.Navigation("Appointments");
+                });
+
+            modelBuilder.Entity("De_zachte_heelmeester.Models.Referral", b =>
                 {
                     b.Navigation("Appointments");
                 });
