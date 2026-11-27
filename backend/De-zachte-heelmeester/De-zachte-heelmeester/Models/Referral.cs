@@ -3,7 +3,7 @@
 namespace De_zachte_heelmeester.Models;
 
 /// <summary>
-/// A referral from a general practitioner. The care code says which treatment the patient needs,
+/// A referral from a general practitioner or a specialist. The care code says which treatment the patient needs,
 /// the specialism and the duration come from the list of care treatments.
 /// </summary>
 public class Referral

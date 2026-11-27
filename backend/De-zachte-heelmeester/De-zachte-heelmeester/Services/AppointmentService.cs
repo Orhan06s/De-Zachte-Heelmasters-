@@ -12,15 +12,18 @@ public class AppointmentService : IAppointmentService
     private readonly IEmployeeRepository _employeeRepository;
     private readonly IPatientRepository _patientRepository;
     private readonly ITimeSlotRepository _timeSlotRepository;
+    private readonly IReferralRepository _referralRepository;
 
     public AppointmentService(
         IEmployeeRepository employeeRepository,
         IPatientRepository patientRepository,
-        ITimeSlotRepository timeSlotRepository)
+        ITimeSlotRepository timeSlotRepository,
+        IReferralRepository referralRepository)
     {
         _employeeRepository = employeeRepository;
         _patientRepository = patientRepository;
         _timeSlotRepository = timeSlotRepository;
+        _referralRepository = referralRepository;
     }
 
     public Task<bool> SpecialistExistsAsync(int specialistId) =>
@@ -51,6 +54,14 @@ public class AppointmentService : IAppointmentService
         }
 
         return slots;
+    }
+
+    /// <summary>
+    /// Returns the free moments for the referral of the logged-in patient, for seven days starting at the given date.
+    /// </summary>
+    public Task<ReferralSlotsResult> GetAvailableSlotsForReferralAsync(string userId, int referralId, DateOnly from)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>

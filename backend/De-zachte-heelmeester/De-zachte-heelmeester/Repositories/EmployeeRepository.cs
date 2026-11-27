@@ -1,4 +1,5 @@
 using De_zachte_heelmeester.Data;
+using De_zachte_heelmeester.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace De_zachte_heelmeester.Repositories;
@@ -15,5 +16,13 @@ public class EmployeeRepository : IEmployeeRepository
     public async Task<bool> ExistsAsync(int employeeId)
     {
         return await _context.Employees.AnyAsync(e => e.EmployeeId == employeeId);
+    }
+
+    public async Task<List<Employee>> GetBySpecializationAsync(string specialization)
+    {
+        return await _context.Employees
+            .Where(e => e.Specialization == specialization)
+            .OrderBy(e => e.Name)
+            .ToListAsync();
     }
 }

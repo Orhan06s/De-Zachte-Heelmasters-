@@ -9,5 +9,6 @@ public enum BookingResult
     InvalidRequest,
     SpecialistNotFound,
     PatientNotFound,
-    SlotNotAvailable
+    SlotNotAvailable,
+    ReferralNotFound
 }

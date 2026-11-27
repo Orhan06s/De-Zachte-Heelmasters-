@@ -5,6 +5,8 @@ namespace De_zachte_heelmeester.Models;
 /// </summary>
 public class BookAppointmentRequest
 {
+    public int ReferralId { get; set; }
+
     public int SpecialistId { get; set; }
 
     public DateOnly Date { get; set; }
