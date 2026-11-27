@@ -1,0 +1,6 @@
+@De_zachte_heelmeester_HostAddress = http://localhost:5208
+
+GET {{De_zachte_heelmeester_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
