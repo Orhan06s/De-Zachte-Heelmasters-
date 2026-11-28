@@ -15,6 +15,7 @@ auth.accessMessage = null
         <h1>Startpagina {{ route.meta.title }}</h1>
         <p v-if="accessMessage" class="access-message" role="alert">{{ accessMessage }}</p>
         <p>Je bent ingelogd.</p>
+        <RouterLink v-if="route.name === 'patient-start'" :to="{ name: 'make-appointment' }">Afspraak maken</RouterLink>
     </main>
 </template>
 

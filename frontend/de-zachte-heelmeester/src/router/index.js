@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import RegisterView from '@/views/RegisterView.vue'
 import LoginView from '@/views/LoginView.vue'
 import StartView from '@/views/StartView.vue'
+import MakeAppointmentView from '@/views/MakeAppointmentView.vue'
 import { useAuthStore } from '@/stores/auth.js'
 import { startPageFor, hasAccess } from '@/utils/startPage.js'
 
@@ -12,6 +13,7 @@ const router = createRouter({
     { path: '/registreren', name: 'register', component: RegisterView },
     { path: '/inloggen', name: 'login', component: LoginView },
     { path: '/patient', name: 'patient-start', component: StartView, meta: { title: 'patiënt', roles: ['Patient'] } },
+    { path: '/patient/afspraak-maken', name: 'make-appointment', component: MakeAppointmentView, meta: { roles: ['Patient'] } },
     { path: '/huisarts', name: 'general-practitioner-start', component: StartView, meta: { title: 'huisarts', roles: ['Huisarts'] } },
     { path: '/specialist', name: 'specialist-start', component: StartView, meta: { title: 'specialist', roles: ['Specialist'] } },
     { path: '/medewerker', name: 'employee-start', component: StartView, meta: { title: 'medewerker', roles: ['Medewerker'] } },
