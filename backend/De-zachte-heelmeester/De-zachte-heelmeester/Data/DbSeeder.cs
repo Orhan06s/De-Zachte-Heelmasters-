@@ -9,7 +9,9 @@ namespace De_zachte_heelmeester.Data
         public static readonly string[] Roles = ["Patient", "Huisarts", "Specialist", "Medewerker", "Beheerder"];
 
         // Test accounts for trying the app locally. Only used in Development (see Program.cs).
-        public const string TestPassword = "Test123!wachtwoord";
+        // The password is not in the code, it comes from user-secrets:
+        // dotnet user-secrets set "TestData:Password" "<password>" --project backend/De-zachte-heelmeester/De-zachte-heelmeester
+        public const string TestPasswordSetting = "TestData:Password";
         public const string TestPatientEmail = "patient@test.nl";
         public const string TestSpecialistEmail = "cardioloog@test.nl";
 
@@ -44,10 +46,11 @@ namespace De_zachte_heelmeester.Data
         /// </summary>
         public static async Task SeedTestDataAsync(
             ApplicationDbContext context,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            string password)
         {
             // Test patient with an account
-            var patientUser = await GetOrCreateUserAsync(userManager, TestPatientEmail, "Patient");
+            var patientUser = await GetOrCreateUserAsync(userManager, TestPatientEmail, "Patient", password);
 
             if (!await context.Patients.AnyAsync(p => p.BSN == TestPatientBsn))
             {
@@ -63,7 +66,7 @@ namespace De_zachte_heelmeester.Data
             }
 
             // Test specialist (Cardiologie, Monday to Friday)
-            var specialistUser = await GetOrCreateUserAsync(userManager, TestSpecialistEmail, "Specialist");
+            var specialistUser = await GetOrCreateUserAsync(userManager, TestSpecialistEmail, "Specialist", password);
 
             if (!await context.Employees.AnyAsync(e => e.UserId == specialistUser.Id))
             {
@@ -85,7 +88,7 @@ namespace De_zachte_heelmeester.Data
             }
         }
 
-        private static async Task<User> GetOrCreateUserAsync(UserManager<User> userManager, string email, string role)
+        private static async Task<User> GetOrCreateUserAsync(UserManager<User> userManager, string email, string role, string password)
         {
             var user = await userManager.FindByEmailAsync(email);
             if (user != null)
@@ -94,7 +97,7 @@ namespace De_zachte_heelmeester.Data
             }
 
             user = new User { UserName = email, Email = email, EmailConfirmed = true };
-            var result = await userManager.CreateAsync(user, TestPassword);
+            var result = await userManager.CreateAsync(user, password);
             if (!result.Succeeded)
             {
                 throw new InvalidOperationException($"Test user {email} could not be created.");

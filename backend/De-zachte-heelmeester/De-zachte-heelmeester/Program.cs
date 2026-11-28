@@ -94,13 +94,23 @@ namespace De_zachte_heelmeester
 
                 await DbSeeder.SeedAsync(context, roleManager);
 
-                // Test data for trying the app locally, never online
+                // Test data for trying the app locally, never online.
+                // The password comes from user-secrets, so it is not in the code.
                 if (app.Environment.IsDevelopment())
                 {
-                    var userManager = scope.ServiceProvider
-                        .GetRequiredService<UserManager<User>>();
+                    var testPassword = app.Configuration[DbSeeder.TestPasswordSetting];
 
-                    await DbSeeder.SeedTestDataAsync(context, userManager);
+                    if (string.IsNullOrEmpty(testPassword))
+                    {
+                        app.Logger.LogWarning("No test data: set {Setting} with dotnet user-secrets (see DbSeeder).", DbSeeder.TestPasswordSetting);
+                    }
+                    else
+                    {
+                        var userManager = scope.ServiceProvider
+                            .GetRequiredService<UserManager<User>>();
+
+                        await DbSeeder.SeedTestDataAsync(context, userManager, testPassword);
+                    }
                 }
             }
 
