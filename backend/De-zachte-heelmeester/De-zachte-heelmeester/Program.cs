@@ -93,6 +93,15 @@ namespace De_zachte_heelmeester
                     .GetRequiredService<RoleManager<IdentityRole>>();
 
                 await DbSeeder.SeedAsync(context, roleManager);
+
+                // Test data for trying the app locally, never online
+                if (app.Environment.IsDevelopment())
+                {
+                    var userManager = scope.ServiceProvider
+                        .GetRequiredService<UserManager<User>>();
+
+                    await DbSeeder.SeedTestDataAsync(context, userManager);
+                }
             }
 
             // Configure HTTP request pipeline
